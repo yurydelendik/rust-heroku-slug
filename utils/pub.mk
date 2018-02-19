@@ -1,4 +1,4 @@
-APP=powerful-wave-45685
+APP ?= powerful-wave-45685
 APP_START=node/bin/node .
 SLUG_JSON=downloads/slug.json
 GET_SLUG_URL=${shell node utils/get_json_value ${SLUG_JSON} blob.url}

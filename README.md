@@ -1,0 +1,31 @@
+# Rustc service for WebAssembly Studio
+
+This is heroku rustc compiler microservice for WebAssembly Studio. It is also a slug builder.
+
+## Running service locally
+
+The app/server can be run from the "app" folder:
+
+```
+cd app
+node .
+```
+
+By default it will run on "0.0.0.0:8082" address. Use `PORT` environment variable to change it.
+
+Before running it first time, you will need to setup the dependencies:
+
+1. rustup, see https://www.rustup.rs/
+2. rustc nightly channel: `rustup toolchain install nightly`
+3. and wasm target: `rustup target add wasm32-unknown-unknown --toolchain nightly`
+4. wasm-cg: `cargo install --git https://github.com/alexcrichton/wasm-gc`
+
+See also [Rust for the Web](https://www.hellorust.com/setup/wasm-target/) for details.
+
+## Change configuration in WebAssembly Studio
+
+The "rustc" endpoint address can be located at the https://github.com/wasdk/WebAssemblyStudio/blob/master/config.json and be changed locally.
+
+## Building and installing the slug
+
+Run `APP=<your-heroku-app> make publish` to fully build and setup slug at your app.
