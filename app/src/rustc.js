@@ -2,10 +2,7 @@ const fs = require('fs');
 const { exec } = require('child_process');
 
 const { rustcCmd, wasmGCCmd, tempDir } = require("../config.js");
-
-function joinCmd(arr) {
-  return arr.join(' ');
-}
+const { joinCmd } = require("./common.js");
 
 function wasmGC(wasmFile, callback) {
   fs.exists(wasmFile, (exists) => {

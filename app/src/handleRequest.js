@@ -56,6 +56,20 @@ module.exports = function handleRequest(req, res) {
     return;
   }
 
+  if (req.url == "/rustfmt") {
+    if (req.method != "POST") return notAllowed(res);
+    readFormData(req, (err, post) => {
+      if (err) return showError(res, err);
+      require('./rustfmt')(post.code, post.options, (err, result) => {
+        if (err) return showError(res, err);
+        res.setHeader('Content-type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify(result));
+      });
+    });
+    return;
+  }
+
   res.writeHead(404);
   res.end();
 };
