@@ -6,7 +6,7 @@ GET_SLUG_ID=${shell node utils/get_json_value ${SLUG_JSON} id}
 
 default: send
 
-${SLUG_JSON}:
+slug_json:
 	mkdir -p downloads
 	curl -X POST \
 -H 'Content-Type: application/json' \
@@ -14,7 +14,7 @@ ${SLUG_JSON}:
 -d '{"process_types":{"web":"${APP_START}"}}' \
 -n https://api.heroku.com/apps/${APP}/slugs -o ${SLUG_JSON}
 
-send: ${SLUG_JSON}
+send: slug_json
 	curl -X PUT \
 -H "Content-Type:" \
 --data-binary @slug.tgz \
@@ -25,4 +25,4 @@ send: ${SLUG_JSON}
 -d '{"slug":"${GET_SLUG_ID}"}' \
 -n https://api.heroku.com/apps/${APP}/releases -o downloads/published.json
 
-.PHONY: default send
+.PHONY: default send slug_json
