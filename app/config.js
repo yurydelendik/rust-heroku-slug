@@ -9,4 +9,8 @@ exports.wasmGCCmd = onServer ?
   homeDir + '/misc/wasm-gc' :
   homeDir + '/.cargo/bin/wasm-gc';
 
+exports.rustfmtCmd = onServer ?
+  homeDir + '/rust/bin/rustfmt' :
+  homeDir + '/.rustup/toolchains/nightly-x86_64-apple-darwin/bin/rustfmt';
+
 exports.tempDir = "/tmp";
