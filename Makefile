@@ -1,18 +1,14 @@
-default:
-
-prepare:
-	$(MAKE) -f utils/node.mk
-	$(MAKE) -f utils/rust.mk
-
-slug.tgz: prepare
-	tar czfv slug.tgz ./app
+slug.tgz: utils/Dockerfile
+	docker build -t tmp -f utils/Dockerfile .
+	id=`docker create tmp` && \
+	   docker cp $$id:slug.tgz slug.tgz && \
+	   docker rm $$id
 
 publish: slug.tgz
 	$(MAKE) -f utils/pub.mk
 
 clean:
-	rm -rf app/node app/rust app/misc
 	rm -rf slug.tgz
 	rm -rf downloads
 
-.PHONY: default prepare publish clean
+.PHONY: slug.tgz publish clean

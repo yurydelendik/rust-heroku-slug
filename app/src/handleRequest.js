@@ -1,4 +1,6 @@
 var qs = require('querystring');
+var rustc = require('./rustc');
+var rustfmt = require('./rustfmt');
 
 function notAllowed(res) {
   res.writeHead(503);
@@ -46,7 +48,7 @@ module.exports = function handleRequest(req, res) {
     if (req.method != "POST") return notAllowed(res);
     readFormData(req, (err, post) => {
       if (err) return showError(res, err);
-      require('./rustc')(post.code, post.options, (err, result) => {
+      rustc(post.code, post.options, (err, result) => {
         if (err) return showError(res, err);
         res.setHeader('Content-type', 'application/json');
         res.writeHead(200);
@@ -60,7 +62,7 @@ module.exports = function handleRequest(req, res) {
     if (req.method != "POST") return notAllowed(res);
     readFormData(req, (err, post) => {
       if (err) return showError(res, err);
-      require('./rustfmt')(post.code, post.options, (err, result) => {
+      rustfmt(post.code, post.options, (err, result) => {
         if (err) return showError(res, err);
         res.setHeader('Content-type', 'application/json');
         res.writeHead(200);
