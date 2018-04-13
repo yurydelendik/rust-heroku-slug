@@ -1,3 +1,7 @@
 tmp/
 downloads/
 slug.tgz
+Cargo.lock
+
+/target
+**/*.rs.bk

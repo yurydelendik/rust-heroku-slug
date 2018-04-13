@@ -19,7 +19,7 @@ send: slug_json
 -H "Content-Type:" \
 --data-binary @slug.tgz \
 "${GET_SLUG_URL}"
-	curl -X POST \
+	curl -v -X POST \
 -H "Accept: application/vnd.heroku+json; version=3" \
 -H "Content-Type: application/json" \
 -d '{"slug":"${GET_SLUG_ID}"}' \
