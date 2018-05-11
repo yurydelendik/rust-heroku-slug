@@ -16,8 +16,9 @@ ENV PATH=$PATH:$HOME/.cargo/bin
 RUN rm -rf $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/share
 RUN rustup target add wasm32-unknown-unknown
 RUN rustup component add rustfmt-preview
-RUN apt-get install -y gcc
-RUN CARGO_TARGET_DIR=/tmp/cargo cargo install wasm-bindgen-cli wasm-gc
+RUN apt-get install -y gcc file make
+RUN CARGO_TARGET_DIR=/tmp/cargo cargo install wasm-bindgen-cli
+RUN CARGO_TARGET_DIR=/tmp/cargo cargo install wasm-gc
 WORKDIR /tmp/wbg
 COPY Cargo.toml .
 COPY utils/blank.rs utils/blank.rs
