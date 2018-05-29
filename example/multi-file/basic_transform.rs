@@ -13,7 +13,7 @@ pub extern fn apply() {
   for (index, frame) in animation.chunks_mut(rows * cols).enumerate() {
     for row in 0 .. rows {
       for col in 0 .. cols {
-        frame[row * cols + col] = Rgb::new(row as u8 * 6, col as u8 * 6, ((index * 6) % 0xffusize) as u8);
+        frame[row * cols + col] = Rgb::new(row as u8 * 6, col as u8 * 6, ((index as u8 * 6) % 0xff));
       }
     }
   }
