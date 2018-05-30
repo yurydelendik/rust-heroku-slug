@@ -1,11 +1,12 @@
 const {
+  cargoCmd,
   rustcCmd,
   wasmGCCmd,
   tempDir,
   wasmBindgenCmd,
   wasmBindgenDeps,
 } = require("../config.js");
-const { exec, joinCmd, exists, writeFile, readFile, unlink } = require("./common.js");
+const { exec, joinCmd, exists, writeFile, readFile, mkdir, unlink } = require("./common.js");
 
 async function wasmGC(wasmFile, callback) {
   if (!await exists(wasmFile)) {
@@ -14,62 +15,63 @@ async function wasmGC(wasmFile, callback) {
   await exec(joinCmd([wasmGCCmd, wasmFile]));
 }
 
-async function rustc(source, options = {}) {
+async function cargo(tar, options = {}) {
   let crateName = 'rustc_h_' + Math.random().toString(36).slice(2);
-  let baseName = tempDir + '/' + crateName;
-  let rustFile = baseName + '.rs';
-  let wasmFile = baseName + '.wasm';
-  await writeFile(rustFile, source);
+  let crateDir = tempDir + '/' + crateName;
+  console.log(crateDir);
+
+  await mkdir(crateDir);
+
+  let rustTar = crateDir + '/' + 'lib.tar';
+  let wasmFile = crateDir + '/' + 'lib.wasm';
+  await writeFile(rustTar, new Buffer(tar, 'base64').toString('ascii'));
+
+  let args = ["tar", "xvf", rustTar, "-C", crateDir];
+  await exec(joinCmd(args));
 
   try {
-    let args = [rustcCmd, rustFile];
+    let args = [cargoCmd, "build"];
+    args.push('--manifest-path=' + crateDir + '/' + 'Cargo.toml');
     args.push('--target=wasm32-unknown-unknown');
-    args.push('--crate-type=cdylib');
     if (options.lto)
       args.push('-Clto');
-    if (options.debug)
-      args.push('-g');
-    switch (options.opt_level) {
-      case 's':
-      case 'z':
-      case '0':
-      case '1':
-      case '2':
-      case '2':
-        args.push('-Copt-level=' + options.opt_level);
-        break;
+    if (options.debug) {
+      args.push('--debug');
+    } else {
+      args.push('--release');
     }
-    args.push('-o');
-    args.push(wasmFile);
-    for (let i = 0; i < wasmBindgenDeps.length; i++) {
-      args.push('-L');
-      args.push(wasmBindgenDeps[i]);
-    }
+
+    let planArgs = args.slice(0);
+    planArgs.push("-Z unstable-options");
+    planArgs.push("--build-plan");
+    planArgs.push("--quiet");
+
+    let planOutput = await exec(joinCmd(planArgs), {});
+    let plan = JSON.parse(planOutput)
+
     let output;
     let success = false;
-    let opts = {
-      // env vars needed for #[wasm_bindgen]
-      env: {
-        CARGO_PKG_NAME: 'main',
-        CARGO_PKG_VERSION: '1.0.0',
-      },
-    };
+
     try {
-      output = await exec(joinCmd(args), opts);
+      output = await exec(joinCmd(args), {});
       success = true;
     } catch(e) {
       output = 'error: ' + e;
     }
     try {
+      let wasmFile = Object.keys(plan["invocations"].slice(-1)[0]["links"])[0];
+
       if (!success)
         return { success, output: "", message: output };
       let wasmBindgenJs = "";
       let wasm = await readFile(wasmFile);
+      console.log("compiling wasm");
       let m = await WebAssembly.compile(wasm);
       let ret = { success, message: output };
       if (WebAssembly.Module.customSections(m, "__wasm_bindgen_unstable").length !== 0) {
+        console.log("found custom section");
         await exec(joinCmd([wasmBindgenCmd, wasmFile, '--no-modules', '--out-dir', tempDir]));
-        wasm = await readFile(baseName + '_bg.wasm');
+        wasm = await readFile(wasmFile + '_bg.wasm');
         ret.wasmBindgenJs = (await readFile(baseName + '.js')).toString();
       } else {
         await exec(joinCmd([wasmGCCmd, wasmFile]));
@@ -78,16 +80,16 @@ async function rustc(source, options = {}) {
       ret.output = wasm.toString('base64');
       return ret;
     } finally {
-      if (success)
-        await unlink(wasmFile);
+      if (success) {}
+        //await unlink(wasmFile);
     }
   } finally {
-    await unlink(rustFile);
+    //await unlink(crateDir);
   }
-};
+}
 
 module.exports = function(source, options, callback) {
-  rustc(source, options)
+  cargo(source, options)
     .then(result => callback(null, result))
     .catch(err => callback(err, null));
 };
