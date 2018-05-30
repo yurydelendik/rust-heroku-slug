@@ -50,18 +50,15 @@ async function rustc(tar, options = {}) {
 
     let output;
     let success = false;
-    let opts = {
-      // env vars needed for #[wasm_bindgen]
-      env: plan["invocations"][0]["env"]
-    };
+
     try {
-      output = await exec(joinCmd(args), opts);
+      output = await exec(joinCmd(args), {});
       success = true;
     } catch(e) {
       output = 'error: ' + e;
     }
     try {
-      let wasmFile = Object.keys(plan["invocations"][0]["links"])[0];
+      let wasmFile = Object.keys(plan["invocations"].slice(-1)[0]["links"])[0];
 
       if (!success)
         return { success, output: "", message: output };
