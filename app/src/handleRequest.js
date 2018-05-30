@@ -48,7 +48,7 @@ module.exports = function handleRequest(req, res) {
     if (req.method != "POST") return notAllowed(res);
     readFormData(req, (err, post) => {
       if (err) return showError(res, err);
-      rustc(post.code, post.options, (err, result) => {
+      rustc(post.tar, post.options, (err, result) => {
         if (err) return showError(res, err);
         res.setHeader('Content-type', 'application/json');
         res.writeHead(200);

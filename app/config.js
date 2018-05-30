@@ -17,6 +17,7 @@ if (!onServer) {
 }
 const deps = wasmBindgenRoot + '/wasm32-unknown-unknown/release/deps';
 exports.wasmBindgenDeps = [deps, wasmBindgenRoot + '/release/deps'];
+exports.cargoCmd = homeDir + '/.cargo/bin/cargo';
 exports.rustcCmd = homeDir + '/.cargo/bin/rustc';
 exports.wasmGCCmd = homeDir + '/.cargo/bin/wasm-gc';
 exports.wasmBindgenCmd = homeDir + '/.cargo/bin/wasm-bindgen';

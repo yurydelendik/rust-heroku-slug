@@ -49,6 +49,18 @@ function readFile(path) {
   });
 }
 
+function mkdir(path) {
+  return new Promise(function(resolve, reject) {
+    fs.mkdir(path, err => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(true);
+      }
+    });
+  });
+}
+
 function unlink(path) {
   return new Promise(function(resolve, reject) {
     fs.unlink(path, err => {
@@ -61,4 +73,4 @@ function unlink(path) {
   });
 }
 
-module.exports = {joinCmd, exec, exists, writeFile, readFile, unlink};
+module.exports = {joinCmd, exec, exists, writeFile, readFile, mkdir, unlink};
