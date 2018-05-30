@@ -43,6 +43,7 @@ async function rustc(tar, options = {}) {
     let planArgs = args.slice(0);
     planArgs.push("-Z unstable-options");
     planArgs.push("--build-plan");
+    planArgs.push("--quiet");
 
     let planOutput = await exec(joinCmd(planArgs), {});
     let plan = JSON.parse(planOutput)
@@ -51,10 +52,7 @@ async function rustc(tar, options = {}) {
     let success = false;
     let opts = {
       // env vars needed for #[wasm_bindgen]
-      env: {
-        CARGO_PKG_NAME: 'main',
-        CARGO_PKG_VERSION: '1.0.0',
-      },
+      env: plan["invocations"][0]["env"]
     };
     try {
       output = await exec(joinCmd(args), opts);
