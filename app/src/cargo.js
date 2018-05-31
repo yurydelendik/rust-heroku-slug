@@ -8,6 +8,20 @@ const {
 } = require("../config.js");
 const { exec, joinCmd, exists, writeFile, readFile, mkdir, unlink } = require("./common.js");
 
+function checkBuildPlan(plan) {
+  let success = true;
+  let invocations = plan["invocations"];
+  console.log(invocations.length);
+
+  if (invocations.length > 1) {
+    console.log("here");
+    success = false;
+    return { success, output: "", message: "dependencies are currently deactivated" };
+  }
+
+  return success;
+}
+
 async function wasmGC(wasmFile, callback) {
   if (!await exists(wasmFile)) {
     throw new Error("wasm is not found")
@@ -18,7 +32,6 @@ async function wasmGC(wasmFile, callback) {
 async function cargo(tar, options = {}) {
   let crateName = 'rustc_h_' + Math.random().toString(36).slice(2);
   let crateDir = tempDir + '/' + crateName;
-  console.log(crateDir);
 
   await mkdir(crateDir);
 
@@ -46,8 +59,13 @@ async function cargo(tar, options = {}) {
     planArgs.push("--build-plan");
     planArgs.push("--quiet");
 
-    let planOutput = await exec(joinCmd(planArgs), {});
-    let plan = JSON.parse(planOutput)
+    let buildPlanOutput = await exec(joinCmd(planArgs), {});
+    let buildPlan = JSON.parse(buildPlanOutput);
+
+    let checkResult = checkBuildPlan(buildPlan);
+
+    if (!checkResult.success)
+      return checkResult;
 
     let output;
     let success = false;
@@ -62,14 +80,7 @@ async function cargo(tar, options = {}) {
       if (!success)
         return { success, output: "", message: output };
 
-      let invocations = plan["invocations"];
-
-      if (invocations.length > 1) {
-        success = false;
-        return { success, output: "", message: "dependencies are currently deactivated" };
-      }
-
-      let wasmFile = Object.keys(invocation.slice(-1)[0]["links"])[0];
+      let wasmFile = Object.keys(buildPlan["invocations"].slice(-1)[0]["links"])[0];
 
       let wasmBindgenJs = "";
       let wasm = await readFile(wasmFile);
