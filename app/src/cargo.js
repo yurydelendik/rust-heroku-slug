@@ -59,10 +59,18 @@ async function cargo(tar, options = {}) {
       output = 'error: ' + e;
     }
     try {
-      let wasmFile = Object.keys(plan["invocations"].slice(-1)[0]["links"])[0];
-
       if (!success)
         return { success, output: "", message: output };
+
+      let invocations = plan["invocations"];
+
+      if (invocations.length > 1) {
+        success = false;
+        return { success, output: "", message: "dependencies are currently deactivated" };
+      }
+
+      let wasmFile = Object.keys(invocation.slice(-1)[0]["links"])[0];
+
       let wasmBindgenJs = "";
       let wasm = await readFile(wasmFile);
       console.log("compiling wasm");
