@@ -11,15 +11,22 @@ const { exec, joinCmd, exists, writeFile, readFile, mkdir, unlink } = require(".
 function checkBuildPlan(plan) {
   let success = true;
   let invocations = plan["invocations"];
-  console.log(invocations.length);
+
+  var custom_build = invocations.find(function(element) {
+    return element["target_kind"].includes("custom-build");
+  });
+
+  if (custom_build) {
+    success = false;
+    return { success, output: "", message: "the build includes custom builds" };
+  }
 
   if (invocations.length > 1) {
-    console.log("here");
     success = false;
     return { success, output: "", message: "dependencies are currently deactivated" };
   }
 
-  return success;
+  return { "success": true };
 }
 
 async function wasmGC(wasmFile, callback) {
@@ -46,8 +53,7 @@ async function cargo(tar, options = {}) {
     let args = [cargoCmd, "build"];
     args.push('--manifest-path=' + crateDir + '/' + 'Cargo.toml');
     args.push('--target=wasm32-unknown-unknown');
-    if (options.lto)
-      args.push('-Clto');
+
     if (options.debug) {
       args.push('--debug');
     } else {
@@ -84,11 +90,10 @@ async function cargo(tar, options = {}) {
 
       let wasmBindgenJs = "";
       let wasm = await readFile(wasmFile);
-      console.log("compiling wasm");
+
       let m = await WebAssembly.compile(wasm);
       let ret = { success, message: output };
       if (WebAssembly.Module.customSections(m, "__wasm_bindgen_unstable").length !== 0) {
-        console.log("found custom section");
         await exec(joinCmd([wasmBindgenCmd, wasmFile, '--no-modules', '--out-dir', tempDir]));
         wasm = await readFile(wasmFile + '_bg.wasm');
         ret.wasmBindgenJs = (await readFile(baseName + '.js')).toString();
