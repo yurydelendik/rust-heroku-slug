@@ -51,12 +51,10 @@ async function cargo(tar, options = {}) {
 
   try {
     let args = [cargoCmd, "build"];
-    args.push('--manifest-path=' + crateDir + '/' + 'Cargo.toml');
+    args.push('--manifest-path=' + crateDir + '/Project/' + 'Cargo.toml');
     args.push('--target=wasm32-unknown-unknown');
 
-    if (options.debug) {
-      args.push('--debug');
-    } else {
+    if (!options.debug) {
       args.push('--release');
     }
 
