@@ -1,4 +1,5 @@
 var qs = require('querystring');
+var cargo = require('./cargo');
 var rustc = require('./rustc');
 var rustfmt = require('./rustfmt');
 
@@ -41,6 +42,20 @@ module.exports = function handleRequest(req, res) {
   if (req.method == "OPTIONS") {
     res.writeHead(200);
     res.end();
+    return;
+  }
+
+  if (req.url == "/cargo") {
+    if (req.method != "POST") return notAllowed(res);
+    readFormData(req, (err, post) => {
+      if (err) return showError(res, err);
+      cargo(post.tar, post.options, (err, result) => {
+        if (err) return showError(res, err);
+        res.setHeader('Content-type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify(result));
+      });
+    });
     return;
   }
 
