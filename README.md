@@ -26,7 +26,7 @@ See also [Rust for the Web](https://www.hellorust.com/setup/wasm-target/) for de
 
 ## Change configuration in WebAssembly Studio
 
-The "rustc" endpoint address can be located at the https://github.com/wasdk/WebAssemblyStudio/blob/master/config.json and be changed locally.
+The "rustc" and  "cargo" endpoints addresses can be located at the https://github.com/wasdk/WebAssemblyStudio/blob/master/config.json and be changed locally.
 
 ## Building and installing the slug
 
